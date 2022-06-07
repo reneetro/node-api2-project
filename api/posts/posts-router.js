@@ -30,4 +30,43 @@ router.get('/:id', (req, res) => {
     })
 })
 
+router.post('/', (req, res) => {
+    if(req.body.title == null || req.body.contents == null){
+        res.status(400).json({ message: 'provide title and contents'});
+        return;
+    }
+    Post.insert(req.body)
+        .then(result => {
+            res.status(201)
+            .json({
+                id: result, 
+                contents: req.body.contents, 
+                title: req.body.title
+            });
+        })
+         .catch(error => {
+            console.log(error);
+            res.status(500).json({ message: 'error adding the post' })
+     })
+})
+
+router.put('/:id', (req, res) => {
+    const changes = req.body;
+    if(req.body.title && req.body.contents){
+        Post.update(req.params.id, changes)
+            .then(result => {
+                if(result) {
+                    res.status(200).json({id:result, title: req.body.title, contents:req.body.contents})
+                } else {
+                    res.status(404).json({message: 'does not exist'})
+                }
+            })
+            .catch(error => {
+                console.log(error);
+                res.status(500).json({message: 'error updating the post'})
+            })
+    } else {
+        res.status(400).json({message: 'provide title and contents'})
+    }
+})
 module.exports = router
